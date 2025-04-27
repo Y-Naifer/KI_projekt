@@ -5,6 +5,7 @@ Visualizes the board from a FEN string.
 """
 
 import sys
+import random
 from core.fen import FenParser
 from core.piece import PieceType
 
@@ -53,11 +54,14 @@ def visualize_board(fen_str):
     
     # Get all legal moves
     moves = parser.get_move_descriptions(fen_str)
-    moves.sort()
     
     print(f"\nLegal moves: {len(moves)}")
-    for move in moves:
-        print(f"  {move}")
+    if moves:
+        # Select and display only one random move
+        random_move = random.choice(moves)
+        print(f"  Selected move: {random_move}")
+    else:
+        print("  No legal moves available")
 
 def main():
     if len(sys.argv) < 2:

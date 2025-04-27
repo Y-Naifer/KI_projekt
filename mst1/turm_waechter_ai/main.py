@@ -7,6 +7,7 @@ Usage:
 """
 
 import sys
+import random
 from core.fen import FenParser
 
 def main():
@@ -21,11 +22,13 @@ def main():
     try:
         # Get moves in algebraic notation
         moves = parser.get_move_descriptions(fen_str)
-        moves.sort()  # Sort alphabetically
         
-        # Output just the list of moves, one per line
-        for move in moves:
-            print(move)
+        if moves:
+            # Select only one random move
+            random_move = random.choice(moves)
+            print(random_move)
+        else:
+            print("No legal moves available")
                 
     except Exception as e:
         print(f"Error: {e}")
