@@ -35,8 +35,9 @@ class GameRules:
         if dx != 0 and dy != 0:
             return False
             
-        # Move distance must exactly equal the stack height
-        if abs(dx) != height and abs(dy) != height:
+        # Move distance must exactly equal the height of the moving pieces
+        move_distance = max(abs(dx), abs(dy))
+        if move_distance != height:
             return False
             
         # Check for obstacles in the path
@@ -83,11 +84,11 @@ class GameRules:
         if moving_piece_type == PieceType.TURM and target_piece_type == PieceType.WAECHTER:
             return True
             
-        # Tower can capture Tower of equal or greater height only if moving the entire tower
+        # Tower can capture Tower if the moved height is equal to or greater than the target stack height
         if (moving_piece_type == PieceType.TURM and 
             target_piece_type == PieceType.TURM):
-            # Check if we're moving the entire tower (height equals stack size)
-            if height == len(from_stack) and len(to_stack) <= len(from_stack):
+            # Check if the moved stack height is equal to or greater than the target stack height
+            if height >= len(to_stack):
                 return True
             else:
                 return False
@@ -123,6 +124,8 @@ class GameRules:
     def get_legal_moves(self, player: int) -> List[Tuple[Tuple[int, int], Tuple[int, int], int]]:
         """Get all legal moves for a player."""
         legal_moves = []
+        # Use a set to track moves we've already added to avoid duplicates
+        added_moves = set()
         
         for y in range(self.board.SIZE):
             for x in range(self.board.SIZE):
@@ -134,22 +137,34 @@ class GameRules:
                 for height in range(1, len(stack) + 1):
                     # Try all four directions
                     for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
-                        nx, ny = x + dx * height, y + dy * height
-                        
-                        if not (0 <= nx < self.board.SIZE and 0 <= ny < self.board.SIZE):
-                            continue
-                        
-                        # First check if the move is valid according to movement rules
-                        if not self.is_valid_move((x, y), (nx, ny), height):
-                            continue
-                        
-                        target_stack = self.board.get_stack(nx, ny)
-                        
-                        # Empty destination or capture or stack
-                        if (not target_stack or 
-                            self.is_valid_capture((x, y), (nx, ny), height) or
-                            self.is_valid_stack((x, y), (nx, ny), height)):
-                            legal_moves.append(((x, y), (nx, ny), height))
+                        # Try all possible distances based on height
+                        for distance in range(1, height + 1):
+                            nx, ny = x + dx * distance, y + dy * distance
+                            
+                            if not (0 <= nx < self.board.SIZE and 0 <= ny < self.board.SIZE):
+                                continue
+                            
+                            # When moving less than the full height, adjust the height to match the distance
+                            move_height = distance
+                            
+                            # Check if we've already added this move
+                            move_key = ((x, y), (nx, ny), move_height)
+                            if move_key in added_moves:
+                                continue
+                                
+                            # First check if the move is valid according to movement rules
+                            if not self.is_valid_move((x, y), (nx, ny), move_height):
+                                continue
+                            
+                            target_stack = self.board.get_stack(nx, ny)
+                            
+                            # Empty destination or capture or stack
+                            if (not target_stack or 
+                                self.is_valid_capture((x, y), (nx, ny), move_height) or
+                                self.is_valid_stack((x, y), (nx, ny), move_height)):
+                                legal_moves.append(((x, y), (nx, ny), move_height))
+                                # Add to set of already added moves
+                                added_moves.add(move_key)
                             
         return legal_moves
         
