@@ -5,12 +5,12 @@ A move generator for the Turm & Wächter board game. This tool takes a FEN strin
 ## Usage
 
 ```
-python main.py "FEN_STRING"
+python zuggenerator.py "FEN_STRING"
 ```
 
 Example:
 ```
-python main.py "b36/3b12r3/7/7/1r2RG4/2/BG4/6r1 b"
+python zuggenerator.py "b36/3b12r3/7/7/1r2RG4/2/BG4/6r1 b"
 ```
 
 ## Output Format
@@ -60,6 +60,11 @@ The standard starting position for Turm & Wächter:
 - Blue Wächter at position D1
 - Blue Towers at positions A1, B1, C2, D3, E2, F1, G1
 
+FEN string for the initial starting position:
+```
+r1r11RG1r1r1/2r11r12/3r13/7/3b13/2b11b12/b1b11BG1b1b1 r
+```
+
 To view the starting position:
 ```
 python show_initial.py
@@ -72,10 +77,10 @@ The FEN string represents the board state and current player:
 - Empty squares are represented by numbers
 - Pieces are represented by characters:
   - 'r': Red tower
-  - 'R': Red watcher (Guardian)
+  - 'RG': Red Guardian (Wächter)
   - 'b': Blue tower
-  - 'B': Blue watcher (Guardian)
-- Stack heights are represented by numbers after the piece
+  - 'BG': Blue Guardian (Wächter)
+- Stack heights are represented by numbers after tower pieces (r1, b1)
 - Current player is represented by 'r' (red) or 'b' (blue) at the end
 
 Example: `b36/3b12r3/7/7/1r2RG4/2/BG4/6r1 b`
@@ -85,15 +90,25 @@ Example: `b36/3b12r3/7/7/1r2RG4/2/BG4/6r1 b`
 For debugging and visualization purposes, you can use:
 
 ```
-python debug.py "FEN_STRING"
+python utils/debug.py "FEN_STRING"
 ```
 
 This will show a visualization of the board and list all legal moves.
 
-To test jumping rules:
+## Benchmarking
+
+To evaluate the performance of the move generator, you can run:
+
 ```
-python jump_test.py
+python benchmark.py
 ```
+
+This runs tests on three representative positions:
+- Initial position: `r1r11RG1r1r1/2r11r12/3r13/7/3b13/2b11b12/b1b11BG1b1b1 r`
+- Midgame position: `3RG1r11/3r33/r36/7/b32b33/7/3BG2b1 b`
+- Endgame position: `RGBG5/7/7/7/7/7/7 r`
+
+Each position is tested with 10,000 iterations to provide reliable performance metrics.
 
 ## Note on Move Generation
 
