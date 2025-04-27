@@ -1,6 +1,6 @@
 from typing import List, Tuple, Dict, Optional
-from core.piece import Piece, PieceType
-from core.board import Board
+from core.piece import PieceType
+from core.bitboard import BitboardBoard
 
 class FenParser:
     """Parser for Turm & Wächter FEN notation.
@@ -11,27 +11,24 @@ class FenParser:
     """
     
     def __init__(self):
-        self.piece_mapping = {
-            'r': (PieceType.TURM, 1),      # Red tower
-            'b': (PieceType.TURM, 2),      # Blue tower
-        }
+        pass
         
-    def parse_fen(self, fen_str: str) -> Tuple[Board, int]:
+    def parse_fen(self, fen_str: str) -> Tuple[BitboardBoard, int]:
         """Parse a FEN string into a board state and current player.
         
         Args:
             fen_str: FEN string representing the board state and current player
             
         Returns:
-            Tuple of (Board, current_player)
+            Tuple of (BitboardBoard, current_player)
         """
         # Split FEN string into board and current player
         parts = fen_str.strip().split()
         board_str = parts[0]
         current_player = 1 if parts[1] == 'r' else 2  # r for red (player 1), b for blue (player 2)
         
-        # Create empty board
-        board = Board(setup_initial=False)
+        # Create empty bitboard
+        board = BitboardBoard(setup_initial=False)
         
         # Parse board string
         rows = board_str.split('/')
@@ -44,23 +41,25 @@ class FenParser:
             while i < len(row) and x < board.SIZE:
                 # Check for RG (Red Guard)
                 if i + 1 < len(row) and row[i:i+2] == "RG":
-                    board.grid[y][x].append(Piece(PieceType.WAECHTER, 1))
+                    board.red_guardian = board._set_bit(board.red_guardian, x, y)
                     i += 2
                     x += 1
                 # Check for BG (Blue Guard)
                 elif i + 1 < len(row) and row[i:i+2] == "BG":
-                    board.grid[y][x].append(Piece(PieceType.WAECHTER, 2))
+                    board.blue_guardian = board._set_bit(board.blue_guardian, x, y)
                     i += 2
                     x += 1
                 # Check for tower pieces (r1-r7, b1-b7)
                 elif row[i] in ('r', 'b') and i + 1 < len(row) and row[i+1].isdigit():
-                    piece_type, player = self.piece_mapping[row[i]]
+                    player = 1 if row[i] == 'r' else 2
                     height = int(row[i+1])
                     
                     # Tower height should be between 1 and 7
                     if 1 <= height <= 7:
-                        for _ in range(height):
-                            board.grid[y][x].append(Piece(piece_type, player))
+                        if player == 1:  # Red tower
+                            board.red_towers[height] = board._set_bit(board.red_towers[height], x, y)
+                        else:  # Blue tower
+                            board.blue_towers[height] = board._set_bit(board.blue_towers[height], x, y)
                     
                     i += 2
                     x += 1
@@ -105,13 +104,13 @@ class FenParser:
         Returns:
             List of move descriptions in algebraic notation
         """
-        from core.rules import GameRules
+        from core.bitboard_rules import BitboardRules
         
         # Parse the FEN string
         board, current_player = self.parse_fen(fen_str)
         
         # Setup rules engine
-        rules = GameRules(board)
+        rules = BitboardRules(board)
         rules.current_player = current_player
         
         # Get all legal moves

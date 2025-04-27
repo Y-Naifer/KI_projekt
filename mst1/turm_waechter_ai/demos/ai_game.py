@@ -7,9 +7,9 @@ This script demonstrates AI playing a game against itself (Random vs Random).
 import time
 import random
 from typing import List, Tuple, Optional
-from core.board import Board
-from core.piece import Piece, PieceType
-from core.rules import GameRules
+from core.bitboard import BitboardBoard
+from core.piece import PieceType
+from core.bitboard_rules import BitboardRules
 from core.fen import FenParser
 from ai.dummy_ai import dummy_ai_choose_move
 
@@ -18,8 +18,8 @@ def play_ai_game(max_moves=50):
     Have the AI play a game against itself.
     Returns the game history and result.
     """
-    board = Board(setup_initial=True)
-    rules = GameRules(board)
+    board = BitboardBoard(setup_initial=True)
+    rules = BitboardRules(board)
     current_player = 1  # Start with Red player
     
     move_history = []
@@ -48,6 +48,9 @@ def play_ai_game(max_moves=50):
         move_desc = f"{from_col}{from_row}-{to_col}{to_row}-{height}"
         move_history.append(move_desc)
         
+        # Print move with clear separation
+        if move_num > 1:
+            print("\n-----------------------------------------------------------")
         print(f"Move {move_num}: {player_name} plays {move_desc}")
         
         # Make the move
@@ -60,6 +63,7 @@ def play_ai_game(max_moves=50):
         current_player = 3 - current_player
     
     # Report game result
+    print("-----------------------------------------------------------")
     if rules.is_game_over():
         winner = "Red" if rules.get_winner() == 1 else "Blue"
         print(f"\nGame over! {winner} wins!")
@@ -68,24 +72,35 @@ def play_ai_game(max_moves=50):
     
     return move_history, rules.get_winner()
 
-def print_board_state(board: Board):
-    """Print a simple representation of the board"""
-    print("  A B C D E F G")
+def print_board_state(board: BitboardBoard):
+    """Print a simple representation of the board with stack heights"""
+    print("")  # Add empty line before the board
+    print("   A    B    C    D    E    F    G  ")
+    print("")
     for y in range(board.SIZE):
-        row = f"{7-y} "
+        row = f"{7-y}  "
         for x in range(board.SIZE):
-            stack = board.get_stack(x, y)
-            if not stack:
-                row += ". "
+            owner = board.get_stack_owner(x, y)
+            if owner is None:
+                row += ".    "
             else:
-                top_piece = stack[-1]
-                if top_piece.piece_type == PieceType.TURM:
-                    piece_char = "r" if top_piece.player == 1 else "b"
+                piece_type = board.get_top_piece_type(x, y)
+                stack_height = board.get_stack_height(x, y)
+                
+                if piece_type == PieceType.TURM:
+                    piece_char = "r" if owner == 1 else "b"
                 else:  # WAECHTER
-                    piece_char = "R" if top_piece.player == 1 else "B"
-                row += piece_char + " "
-        print(row)
-    print()
+                    piece_char = "R" if owner == 1 else "B"
+                
+                # Add height number for stacks higher than 1
+                if stack_height > 1:
+                    row += f"{piece_char}{stack_height}   "
+                else:
+                    row += f"{piece_char}    "
+        print(row + f" {7-y}")
+        print("")  # Add an empty line between each row
+    print("   A    B    C    D    E    F    G  ")
+    print("")  # Add empty line after the board
 
 def main():
     print("Turm & Wächter AI Demonstration")
@@ -96,7 +111,6 @@ def main():
     
     print("\nAdditional Tools:")
     print("- To run benchmark tests: python benchmark.py")
-    print("- To run unit tests: python unit_tests.py")
 
 if __name__ == "__main__":
     main() 

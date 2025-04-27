@@ -6,7 +6,7 @@ This script tests the move generator for specific game positions.
 
 import unittest
 from core.fen import FenParser
-from core.rules import GameRules
+from core.bitboard_rules import BitboardRules
 
 class TestMoveGenerator(unittest.TestCase):
     """Unit tests for the move generator"""
@@ -33,7 +33,7 @@ class TestMoveGenerator(unittest.TestCase):
         board, current_player = parser.parse_fen(fen_str)
         
         # Get all legal moves using the rules engine
-        rules = GameRules(board)
+        rules = BitboardRules(board)
         # Make sure to set the current player in the rules object
         rules.current_player = current_player
         legal_moves = rules.get_legal_moves(current_player)
@@ -81,7 +81,7 @@ class TestMoveGenerator(unittest.TestCase):
         board, current_player = parser.parse_fen(fen_str)
         
         # Get all legal moves using the rules engine
-        rules = GameRules(board)
+        rules = BitboardRules(board)
         # Make sure to set the current player in the rules object
         rules.current_player = current_player
         legal_moves = rules.get_legal_moves(current_player)
@@ -105,10 +105,9 @@ class TestMoveGenerator(unittest.TestCase):
         self.assertIn(watcher_move, move_descriptions, 
                       f"Winning move {watcher_move} should be in legal moves")
         
-        # Manually test the win condition logic rather than using make_move
-        # Blue Wächter at D6 (3,1) moving to D7 (3,0) should win the game
-        self.assertTrue(board.grid[1][3] and board.grid[1][3][-1].piece_type.value == 'W' and 
-                        board.grid[1][3][-1].player == 2, "Blue Wächter should be at D6")
+        # Manually test that Blue Wächter is at D6 (3,1)
+        self.assertEqual(board.get_stack_owner(3, 1), 2, "Blue Wächter should be at D6")
+        self.assertEqual(board.get_top_piece_type(3, 1).value, 'W', "Piece at D6 should be a Wächter")
         
         # In this game, if Blue Wächter (player 2) reaches the top row (Wächter start field of opponent),
         # it's a win condition for Blue
@@ -135,7 +134,7 @@ class TestMoveGenerator(unittest.TestCase):
         board, current_player = parser.parse_fen(fen_str)
         
         # Get all legal moves using the rules engine
-        rules = GameRules(board)
+        rules = BitboardRules(board)
         # Make sure to set the current player in the rules object
         rules.current_player = current_player
         legal_moves = rules.get_legal_moves(current_player)
@@ -181,7 +180,7 @@ class TestMoveGenerator(unittest.TestCase):
         board, current_player = parser.parse_fen(fen_str)
         
         # Get all legal moves using the rules engine
-        rules = GameRules(board)
+        rules = BitboardRules(board)
         # Make sure to set the current player in the rules object
         rules.current_player = current_player
         legal_moves = rules.get_legal_moves(current_player)
@@ -220,7 +219,7 @@ class TestMoveGenerator(unittest.TestCase):
         board, current_player = parser.parse_fen(fen_str)
         
         # Get all legal moves using the rules engine
-        rules = GameRules(board)
+        rules = BitboardRules(board)
         # Make sure to set the current player in the rules object
         rules.current_player = current_player
         legal_moves = rules.get_legal_moves(current_player)
@@ -260,7 +259,7 @@ class TestMoveGenerator(unittest.TestCase):
         board, current_player = parser.parse_fen(fen_str)
         
         # Get all legal moves using the rules engine
-        rules = GameRules(board)
+        rules = BitboardRules(board)
         # Make sure to set the current player in the rules object
         rules.current_player = current_player
         legal_moves = rules.get_legal_moves(current_player)
@@ -299,7 +298,7 @@ class TestMoveGenerator(unittest.TestCase):
         board, current_player = parser.parse_fen(fen_str)
         
         # Get all legal moves using the rules engine
-        rules = GameRules(board)
+        rules = BitboardRules(board)
         # Make sure to set the current player in the rules object
         rules.current_player = current_player
         legal_moves = rules.get_legal_moves(current_player)
@@ -336,7 +335,7 @@ class TestMoveGenerator(unittest.TestCase):
         board, current_player = parser.parse_fen(fen_str)
         
         # Get all legal moves using the rules engine
-        rules = GameRules(board)
+        rules = BitboardRules(board)
         # Make sure to set the current player in the rules object
         rules.current_player = current_player
         legal_moves = rules.get_legal_moves(current_player)
@@ -375,7 +374,7 @@ class TestMoveGenerator(unittest.TestCase):
         board, current_player = parser.parse_fen(fen_str)
         
         # Get all legal moves using the rules engine
-        rules = GameRules(board)
+        rules = BitboardRules(board)
         # Make sure to set the current player in the rules object
         rules.current_player = current_player
         legal_moves = rules.get_legal_moves(current_player)

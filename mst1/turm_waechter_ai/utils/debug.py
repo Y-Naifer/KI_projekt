@@ -5,9 +5,15 @@ Visualizes the board from a FEN string.
 """
 
 import sys
+import os
 import random
+
+# Add the project root directory to the path to allow importing modules
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from core.fen import FenParser
 from core.piece import PieceType
+from core.bitboard import BitboardBoard
 
 def visualize_board(fen_str):
     """Visualize the board from a FEN string."""
@@ -27,19 +33,19 @@ def visualize_board(fen_str):
     for y in range(board.SIZE):
         print(f"{7-y} ", end="")
         for x in range(board.SIZE):
-            stack = board.get_stack(x, y)
-            if not stack:
+            owner = board.get_stack_owner(x, y)
+            if owner is None:
                 print(" . ", end="")
             else:
-                top_piece = stack[-1]
+                piece_type = board.get_top_piece_type(x, y)
+                stack_height = board.get_stack_height(x, y)
+                
                 piece_char = "?"
-                
-                if top_piece.piece_type == PieceType.TURM:
-                    piece_char = "r" if top_piece.player == 1 else "b"
+                if piece_type == PieceType.TURM:
+                    piece_char = "r" if owner == 1 else "b"
                 else:  # WAECHTER
-                    piece_char = "R" if top_piece.player == 1 else "B"
+                    piece_char = "R" if owner == 1 else "B"
                 
-                stack_height = len(stack)
                 if stack_height > 1:
                     print(f"{piece_char}{stack_height}", end=" ")
                 else:

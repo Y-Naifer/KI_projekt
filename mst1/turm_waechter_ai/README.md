@@ -67,7 +67,7 @@ r1r11RG1r1r1/2r11r12/3r13/7/3b13/2b11b12/b1b11BG1b1b1 r
 
 To view the starting position:
 ```
-python show_initial.py
+python demos/show_initial.py
 ```
 
 ## FEN Format
@@ -85,22 +85,38 @@ The FEN string represents the board state and current player:
 
 Example: `b36/3b12r3/7/7/1r2RG4/2/BG4/6r1 b`
 
-## Debugging Tools
+## Implementation
+
+The codebase uses a bitboard-based representation for the game board. Bitboards use single bits to represent piece positions, which allows for efficient move generation and board state manipulation.
+
+The bitboard implementation:
+- Uses separate bitboards for Red Guardians, Blue Guardians, and Tower stacks of different heights
+- Implements efficient bit operations for board manipulations
+- Provides a clean API for game state management
+
+The implementation is optimized for:
+1. Memory efficiency - using compact bit representations
+2. Clean state transitions - using immutable bit operations
+3. Logical clarity - separating concerns by piece type and player
+
+## Tools and Scripts
+
+### Debugging and Visualization
 
 For debugging and visualization purposes, you can use:
 
 ```
-python utils/debug.py "FEN_STRING"
+PYTHONPATH=. python utils/debug.py "FEN_STRING"
 ```
 
 This will show a visualization of the board and list all legal moves.
 
-## Benchmarking
+### Benchmarking
 
 To evaluate the performance of the move generator, you can run:
 
 ```
-python benchmark.py
+PYTHONPATH=. python benchmarks/benchmark.py
 ```
 
 This runs tests on three representative positions:
@@ -109,6 +125,66 @@ This runs tests on three representative positions:
 - Endgame position: `RGBG5/7/7/7/7/7/7 r`
 
 Each position is tested with 10,000 iterations to provide reliable performance metrics.
+
+### AI Implementation
+
+The project includes a simple AI implementation that selects a random legal move:
+
+```
+PYTHONPATH=. python Dummy_KI.py "FEN_STRING"
+```
+
+Example:
+```
+PYTHONPATH=. python Dummy_KI.py "3RG1r11/3r33/r36/7/b32b33/7/3BG2b1 b"
+```
+
+This will output a single randomly selected legal move in algebraic notation.
+
+### Demo Applications
+
+Several demo applications are provided in the `demos` directory:
+
+- `show_initial.py` - Displays the initial board position
+- `jump_test.py` - Tests if towers can jump over other pieces
+- `ai_game.py` - Demonstrates AI playing a game against itself
+
+Run these demos with:
+```
+PYTHONPATH=. python demos/<script_name>.py
+```
+
+## Testing
+
+To run the unit tests:
+
+```
+PYTHONPATH=. python tests/unit_tests.py
+```
+
+These tests verify the correctness of move generation across different game positions and scenarios.
+
+## Project Structure
+
+- `core/` - Core game logic
+  - `bitboard.py` - Bitboard implementation for board representation
+  - `bitboard_rules.py` - Game rules implementation using bitboards
+  - `fen.py` - FEN string parsing and generation
+  - `piece.py` - Piece type definitions
+
+- `benchmarks/` - Performance testing
+  - `benchmark.py` - Benchmark scripts for move generation
+
+- `utils/` - Utility functions
+  - `debug.py` - Debugging and visualization tools
+
+- `demos/` - Demo applications
+  - `show_initial.py` - Display initial board position
+  - `jump_test.py` - Test jumping mechanics
+  - `ai_game.py` - AI vs AI demonstration
+
+- `tests/` - Unit tests
+  - `unit_tests.py` - Comprehensive tests for move generation
 
 ## Note on Move Generation
 
