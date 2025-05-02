@@ -219,7 +219,7 @@ class BitboardBoard:
                 self.blue_towers[height] = self._clear_bit(self.blue_towers[height], x, y)
     
     def print_board(self) -> None:
-        """Print a text representation of the board for debugging"""
+        """Print a text representation of the board"""
         print("  A B C D E F G")
         for y in range(self.SIZE):
             row = f"{7-y} "

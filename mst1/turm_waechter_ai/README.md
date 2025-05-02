@@ -101,16 +101,6 @@ The implementation is optimized for:
 
 ## Tools and Scripts
 
-### Debugging and Visualization
-
-For debugging and visualization purposes, you can use:
-
-```
-PYTHONPATH=. python utils/debug.py "FEN_STRING"
-```
-
-This will show a visualization of the board and list all legal moves.
-
 ### Benchmarking
 
 To evaluate the performance of the move generator, you can run:
@@ -174,9 +164,6 @@ These tests verify the correctness of move generation across different game posi
 
 - `benchmarks/` - Performance testing
   - `benchmark.py` - Benchmark scripts for move generation
-
-- `utils/` - Utility functions
-  - `debug.py` - Debugging and visualization tools
 
 - `demos/` - Demo applications
   - `show_initial.py` - Display initial board position

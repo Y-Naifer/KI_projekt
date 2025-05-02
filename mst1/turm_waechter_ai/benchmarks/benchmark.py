@@ -1,98 +1,130 @@
 #!/usr/bin/env python3
 """
 Benchmark tests for Turm & Wächter.
-This script measures the speed of the move generator on different position types:
-- Initial position
-- Midgame position
-- Endgame position
+Tests the speed of the move generator on different positions:
+- Initial position (start of game)
+- Midgame position (some pieces captured)
+- Endgame position (few pieces left)
 
-For each position, it runs 10,000 iterations and measures the total and average time.
+Runs 10k iterations to get reliable performance numbers.
 """
 
 import time
+import sys
 from typing import List, Tuple
 from core.bitboard import BitboardBoard
 from core.bitboard_rules import BitboardRules
 from core.fen import FenParser
 
-# Position FEN strings
-INITIAL_POSITION = "r1r11RG1r1r1/2r11r12/3r13/7/3b13/2b11b12/b1b11BG1b1b1 r"
-MIDGAME_POSITION = "3RG1r11/3r33/r36/7/b32b33/7/3BG2b1 b"
-ENDGAME_POSITION = "RGBG5/7/7/7/7/7/7 r"
+# Test positions (copied from the README)
+INIT_POS = "r1r11RG1r1r1/2r11r12/3r13/7/3b13/2b11b12/b1b11BG1b1b1 r"  # Initial
+MID_POS = "3RG1r11/3r33/r36/7/b32b33/7/3BG2b1 b"  # Midgame with some captures
+END_POS = "RGBG5/7/7/7/7/7/7 r"  # Endgame (just guardians left)
 
-def benchmark_position(fen_str: str, label: str, iterations: int = 10000):
+# For detailed timing info
+DEBUG = False
+
+# Number of iterations - more = more accurate but slower
+ITERATIONS = 10000
+
+def time_it(func):
+    """Simple timing decorator - useful for detailed profiling"""
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        if DEBUG:
+            print(f"{func.__name__} took {(end - start)*1000:.2f}ms")
+        return result
+    return wrapper
+
+def benchmark_position(fen: str, name: str, iters: int = ITERATIONS):
     """
-    Benchmark the move generation speed for a specific position.
-    
-    Args:
-        fen_str: FEN string representation of the position
-        label: Description of the position type
-        iterations: Number of times to generate legal moves
+    Run benchmark on a specific position
     """
-    print(f"\nBenchmarking {label} position")
-    print(f"Position: {fen_str}")
+    print(f"\nBenchmarking {name} position")
+    print(f"Position: {fen}")
     
+    # Setup the board and rules
     parser = FenParser()
-    board, current_player = parser.parse_fen(fen_str)
+    board, player = parser.parse_fen(fen)
     rules = BitboardRules(board)
-    rules.current_player = current_player  # Set the current player correctly
+    rules.current_player = player
     
-    # First check: get number of legal moves (for verification)
-    moves = rules.get_legal_moves(current_player)
+    # Count legal moves first (for verification)
+    # This is outside the timing loop
+    moves = rules.get_legal_moves(player)
     print(f"Legal moves: {len(moves)}")
     
     # Main benchmark
-    print(f"Running {iterations} iterations...")
+    print(f"Running {iters} iterations...")
     
-    start_time = time.time()
-    for _ in range(iterations):
-        rules.get_legal_moves(current_player)
-    end_time = time.time()
+    # Timing code
+    start = time.time()
     
-    total_time = end_time - start_time
-    avg_time = total_time * 1000 / iterations
+    # This is the hotspot where we spend all our time
+    for i in range(iters):
+        rules.get_legal_moves(player)
+        
+        # Progress indicator for slow runs
+        if DEBUG and i % 1000 == 0 and i > 0:
+            sys.stdout.write(".")
+            sys.stdout.flush()
+            
+    end = time.time()
     
-    print(f"Total time: {total_time:.2f} seconds")
-    print(f"Average time: {avg_time:.4f} ms per generation")
+    # Calculate stats
+    elapsed = end - start
+    ms_per_iter = elapsed * 1000 / iters
+    moves_per_sec = iters / elapsed
     
-    return total_time, avg_time, len(moves)
+    print(f"Total time: {elapsed:.2f} seconds")
+    print(f"Average time: {ms_per_iter:.4f} ms per generation")
+    if DEBUG:  # Extra info when debugging
+        print(f"Speed: {moves_per_sec:.0f} moves/second")
+    
+    return elapsed, ms_per_iter, len(moves)
 
 def run_benchmark_tests():
-    """Run benchmark tests for all position types"""
-    print("\nBenchmark Tests for Turm & Wächter Move Generator")
-    print("=================================================\n")
+    """Run benchmarks on all positions"""
+    print("\n========== Turm & Wächter Benchmark ==========")
+    print("Testing move generator performance")
     
-    iterations = 10000
     results = []
     
-    # Test 1: Initial position
-    initial_time, initial_avg, initial_moves = benchmark_position(
-        INITIAL_POSITION, "Initial", iterations
+    # Test initial position (start of game)
+    init_time, init_avg, init_moves = benchmark_position(
+        INIT_POS, "Initial", ITERATIONS
     )
-    results.append(("Initial", initial_time, initial_avg, initial_moves))
+    results.append(("Initial", init_time, init_avg, init_moves))
     
-    # Test 2: Midgame position
-    midgame_time, midgame_avg, midgame_moves = benchmark_position(
-        MIDGAME_POSITION, "Midgame", iterations
+    # Test midgame position
+    mid_time, mid_avg, mid_moves = benchmark_position(
+        MID_POS, "Midgame", ITERATIONS
     )
-    results.append(("Midgame", midgame_time, midgame_avg, midgame_moves))
+    results.append(("Midgame", mid_time, mid_avg, mid_moves))
     
-    # Test 3: Endgame position
-    endgame_time, endgame_avg, endgame_moves = benchmark_position(
-        ENDGAME_POSITION, "Endgame", iterations
+    # Test endgame position (few pieces)
+    end_time, end_avg, end_moves = benchmark_position(
+        END_POS, "Endgame", ITERATIONS
     )
-    results.append(("Endgame", endgame_time, endgame_avg, endgame_moves))
+    results.append(("Endgame", end_time, end_avg, end_moves))
     
-    # Summary
-    print("\nSummary of Results")
-    print("=================")
-    print(f"{'Position':<10} | {'Legal Moves':<12} | {'Total Time (s)':<15} | {'Avg Time (ms)':<15}")
-    print(f"{'-'*10:<10} | {'-'*12:<12} | {'-'*15:<15} | {'-'*15:<15}")
+    # Print a nice summary table
+    print("\n=== Results Summary ===")
+    print(f"Position   | Moves | Total Time (s)  | Avg (ms/move)   | Moves/sec")
+    print(f"-----------|-------|-----------------|-----------------|----------")
     
-    for pos_type, total, avg, moves in results:
-        print(f"{pos_type:<10} | {moves:<12} | {total:<15.2f} | {avg:<15.4f}")
+    for pos, total, avg, moves in results:
+        moves_per_sec = ITERATIONS / total
+        print(f"{pos:<10} | {moves:<5} | {total:<15.2f} | {avg:<15.4f} | {moves_per_sec:.0f}")
     
-    print("\nBenchmark tests completed.")
+    print("\nDone! Benchmarks completed successfully.")
+    
+    if DEBUG:
+        print("\nNotes:")
+        print("- Run with DEBUG=True for more timing info")
+        print("- Increase ITERATIONS for more accurate results")
 
 if __name__ == "__main__":
     run_benchmark_tests() 

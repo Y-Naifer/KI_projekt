@@ -6,12 +6,48 @@ This script demonstrates AI playing a game against itself (Random vs Random).
 
 import time
 import random
+import sys
+import os
 from typing import List, Tuple, Optional
+
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from core.bitboard import BitboardBoard
 from core.piece import PieceType
 from core.bitboard_rules import BitboardRules
 from core.fen import FenParser
-from ai.dummy_ai import dummy_ai_choose_move
+
+# Import from dummy_ki instead of ai.dummy_ai
+def get_random_move(board: BitboardBoard, current_player: int):
+    """Get a random legal move."""
+    # Use FenParser to get moves (same as dummy_ki.py)
+    parser = FenParser()
+    
+    # Convert board to FEN string
+    fen_str = board.to_fen(current_player)
+    
+    # Get legal moves using the parser
+    moves_desc = parser.get_move_descriptions(fen_str)
+    
+    if not moves_desc:
+        return None
+    
+    # Select a random move description
+    move_desc = random.choice(moves_desc)
+    
+    # Parse the move description back to coordinates
+    from_str, to_str, height_str = move_desc.split('-')
+    
+    # Convert algebraic notation to coordinates
+    from_col = ord(from_str[0]) - ord('A')
+    from_row = 7 - int(from_str[1])
+    to_col = ord(to_str[0]) - ord('A')
+    to_row = 7 - int(to_str[1])
+    height = int(height_str)
+    
+    # Return move in the format expected by the rest of the code
+    return ((from_col, from_row), (to_col, to_row), height)
 
 def play_ai_game(max_moves=50):
     """
@@ -32,7 +68,7 @@ def play_ai_game(max_moves=50):
             break
         
         # Get AI move - both players use random AI
-        ai_move = dummy_ai_choose_move(board, current_player)
+        ai_move = get_random_move(board, current_player)
         
         if not ai_move:
             print(f"Player {current_player} has no valid moves!")
