@@ -80,12 +80,9 @@ def benchmark_position(fen: str, name: str, iters: int = ITERATIONS):
     # Calculate stats
     elapsed = end - start
     ms_per_iter = elapsed * 1000 / iters
-    moves_per_sec = iters / elapsed
     
     print(f"Total time: {elapsed:.2f} seconds")
     print(f"Average time: {ms_per_iter:.4f} ms per generation")
-    if DEBUG:  # Extra info when debugging
-        print(f"Speed: {moves_per_sec:.0f} moves/second")
     
     return elapsed, ms_per_iter, len(moves)
 
@@ -116,12 +113,11 @@ def run_benchmark_tests():
     
     # Print a nice summary table
     print("\n=== Results Summary ===")
-    print(f"Position   | Moves | Total Time (s)  | Avg (ms/move)   | Moves/sec")
-    print(f"-----------|-------|-----------------|-----------------|----------")
+    print(f"Position   | Moves | Total Time (s)  | Avg (ms/move)")
+    print(f"-----------|-------|-----------------|------------------")
     
     for pos, total, avg, moves in results:
-        moves_per_sec = ITERATIONS / total
-        print(f"{pos:<10} | {moves:<5} | {total:<15.2f} | {avg:<15.4f} | {moves_per_sec:.0f}")
+        print(f"{pos:<10} | {moves:<5} | {total:<15.2f} | {avg:<15.4f}")
     
     print("\nDone! Benchmarks completed successfully.")
     
