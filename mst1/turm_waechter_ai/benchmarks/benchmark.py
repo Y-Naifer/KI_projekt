@@ -11,14 +11,18 @@ Runs 10k iterations to get reliable performance numbers.
 
 import time
 import sys
+import os
 from typing import List, Tuple
+
+# Add parent directory to sys.path to allow imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from core.bitboard import BitboardBoard
 from core.bitboard_rules import BitboardRules
 from core.fen import FenParser
 
 # Test positions (copied from the README)
 INIT_POS = "r1r11RG1r1r1/2r11r12/3r13/7/3b13/2b11b12/b1b11BG1b1b1 r"  # Initial
-MID_POS = "3RG1r11/3r33/r36/7/b32b33/7/3BG2b1 b"  # Midgame with some captures
+MID_POS = "3RG1r11/3r333/r36/7/b32b33/7/3BG2b1 b"  # Midgame with some captures
 END_POS = "RGBG5/7/7/7/7/7/7 r"  # Endgame (just guardians left)
 
 # For detailed timing info

@@ -1,5 +1,5 @@
 from typing import List, Tuple, Optional
-from core.piece import PieceType
+from .piece import PieceType
 
 class BitboardBoard:
     """

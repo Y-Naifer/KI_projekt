@@ -7,11 +7,14 @@ Usage:
 """
 
 import sys
+import os
+
+# Add parent directory to sys.path to allow imports
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from core.fen import FenParser
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python zuggenerator.py \"<FEN_STRING>\"")
         print("Example: python zuggenerator.py \"b36/3b12r3/7/7/1r2RG4/2/BG4/6r1 b\"")
         sys.exit(1)
         

@@ -1,6 +1,6 @@
 from typing import List, Tuple, Dict, Optional
-from core.piece import PieceType
-from core.bitboard import BitboardBoard
+from .piece import PieceType
+from .bitboard import BitboardBoard
 
 class FenParser:
     """Parser for Turm & Wächter FEN notation.
@@ -104,7 +104,7 @@ class FenParser:
         Returns:
             List of move descriptions in algebraic notation
         """
-        from core.bitboard_rules import BitboardRules
+        from .bitboard_rules import BitboardRules
         
         # Parse the FEN string
         board, current_player = self.parse_fen(fen_str)

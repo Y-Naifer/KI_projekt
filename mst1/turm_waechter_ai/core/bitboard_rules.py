@@ -1,6 +1,6 @@
 from typing import List, Tuple, Optional
-from core.piece import PieceType
-from core.bitboard import BitboardBoard
+from .piece import PieceType
+from .bitboard import BitboardBoard
 
 class BitboardRules:
     """Rules implementation for Turm & Wächter game using bitboard representation."""
